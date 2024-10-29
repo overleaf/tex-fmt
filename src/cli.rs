@@ -91,7 +91,6 @@ impl Cli {
         exit_code
     }
 
-    #[cfg(test)]
     pub const fn new() -> Self {
         Self {
             check: false,

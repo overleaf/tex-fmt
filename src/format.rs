@@ -1,6 +1,7 @@
 //! Core methodology for formatting a file
 
 use crate::cli::*;
+// use crate::Cli;
 use crate::ignore::*;
 use crate::indent::*;
 use crate::logging::*;
@@ -11,18 +12,28 @@ use crate::wrap::*;
 use crate::LINE_END;
 use log::Level::{Info, Warn};
 use std::iter::zip;
+use wasm_bindgen::prelude::*;
+
+extern crate console_error_panic_hook;
+use std::panic;
 
 /// Central function to format a file
+#[wasm_bindgen]
 pub fn format_file(
     old_text: &str,
     file: &str,
-    args: &Cli,
-    logs: &mut Vec<Log>,
+//     args: &Cli,
+//     logs: &mut Vec<Log>,
 ) -> String {
-    record_file_log(logs, Info, file, "Formatting started.");
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
+
+    let args = Cli::new();
+    let mut logs = Vec::<Log>::new();
+
+//     record_file_log(&mut logs, Info, file, "Formatting started.");
 
     // Clean the source file and zip its lines with line numbers
-    let old_text = clean_text(old_text, args);
+    let old_text = clean_text(old_text, &args);
     let mut old_lines = zip(1.., old_text.lines());
 
     // Initialise
@@ -48,7 +59,7 @@ pub fn format_file(
             if !set_ignore_and_report(
                 &line,
                 &mut temp_state,
-                logs,
+                &mut logs,
                 file,
                 &pattern,
             ) {
@@ -57,7 +68,7 @@ pub fn format_file(
                 if needs_env_new_line(&line, &pattern) {
                     // Split the line into two ...
                     let (this_line, next_line) =
-                        put_env_new_line(&line, &temp_state, file, args, logs);
+                        put_env_new_line(&line, &temp_state, file, &args, &mut logs);
                     // ... and queue the second part for formatting.
                     queue.push((linum_old, next_line.to_string()));
                     line = this_line.to_string();
@@ -68,9 +79,9 @@ pub fn format_file(
                 let indent = calculate_indent(
                     &line,
                     &mut temp_state,
-                    logs,
+                    &mut logs,
                     file,
-                    args,
+                    &args,
                     &pattern,
                 );
 
@@ -81,14 +92,14 @@ pub fn format_file(
 
                 // Wrap the line before applying the indent, and loop back
                 // if the line needed wrapping.
-                if needs_wrap(line.trim_start(), indent_length, args) {
+                if needs_wrap(line.trim_start(), indent_length, &args) {
                     let wrapped_lines = apply_wrap(
                         line.trim_start(),
                         indent_length,
                         &temp_state,
                         file,
-                        args,
-                        logs,
+                        &args,
+                        &mut logs,
                     );
                     if let Some([this_line, next_line_start, next_line]) =
                         wrapped_lines
@@ -103,7 +114,7 @@ pub fn format_file(
                 }
 
                 // Lastly, apply the indent if the line didn't need wrapping.
-                line = apply_indent(&line, &indent, args, indent_char);
+                line = apply_indent(&line, &indent, &args, indent_char);
             }
 
             // Add line to new text
@@ -119,11 +130,11 @@ pub fn format_file(
     }
 
     if !indents_return_to_zero(&state) {
-        record_file_log(logs, Warn, file, "Indent does not return to zero.");
+        record_file_log(&mut logs, Warn, file, "Indent does not return to zero.");
     }
 
     new_text = remove_trailing_spaces(&new_text);
-    record_file_log(logs, Info, file, "Formatting complete.");
+    record_file_log(&mut logs, Info, file, "Formatting complete.");
     new_text
 }
 

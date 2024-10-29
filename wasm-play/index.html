@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8" />
+    <title>WASM WASM WASM</title>
+</head>
+<body>
+<script type="module">
+    import init, * as Stuff from "../pkg/tex_fmt.js";
+    init().then(() => {
+        console.log("This is what I got", { Stuff })
+
+        fetch("../tests/source/cv.tex").then(response => {
+            response.text().then(text => {
+                const fileContents = text
+                console.log("Source TeX", {fileContents});
+
+                const formattedFileContents = Stuff.format_file(fileContents, "hello");
+
+                document.getElementById("original").value = fileContents
+                document.getElementById("formatted").value = formattedFileContents
+
+
+                console.log("Changed", formattedFileContents === fileContents);
+            });
+        })
+    });
+</script>
+<textarea id="original" style=""><</textarea>
+<br>
+<textarea id="formatted" style=""><</textarea>
+</body>
+</html>

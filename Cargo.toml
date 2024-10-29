@@ -18,7 +18,13 @@ lazy_static = "1.5.0"
 log = "0.4.22"
 regex = "1.11.0"
 similar = "2.6.0"
+wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1.7"
 
 [profile.release]
 codegen-units = 1
 lto = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/main.rs"

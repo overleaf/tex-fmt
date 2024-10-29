@@ -32,19 +32,16 @@ use crate::format::*;
 use crate::logging::*;
 use crate::read::*;
 use crate::write::*;
+use wasm_bindgen::prelude::*;
 
 #[cfg(test)]
 mod tests;
 
-#[cfg(target_family = "unix")]
 /// Line ending for unix
 const LINE_END: &str = "\n";
 
-#[cfg(target_family = "windows")]
-/// Line ending for Windows
-const LINE_END: &str = "\r\n";
-
-fn main() -> ExitCode {
+#[wasm_bindgen]
+pub fn main() {
     let mut args = Cli::parse();
     init_logger(args.log_level());
 
@@ -54,7 +51,7 @@ fn main() -> ExitCode {
     if exit_code == 0 {
         if args.stdin {
             if let Some((file, text)) = read_stdin(&mut logs) {
-                let new_text = format_file(&text, &file, &args, &mut logs);
+                let new_text = format_file(&text, &file);
                 exit_code = process_output(
                     &args, &file, &text, &new_text, exit_code, &mut logs,
                 );
@@ -64,7 +61,7 @@ fn main() -> ExitCode {
         } else {
             for file in &args.files {
                 if let Some((file, text)) = read(file, &mut logs) {
-                    let new_text = format_file(&text, &file, &args, &mut logs);
+                    let new_text = format_file(&text, &file);
                     exit_code = process_output(
                         &args, &file, &text, &new_text, exit_code, &mut logs,
                     );
@@ -76,5 +73,5 @@ fn main() -> ExitCode {
     }
 
     print_logs(&mut logs);
-    ExitCode::from(exit_code)
+//     ExitCode::from(exit_code)
 }

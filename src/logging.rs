@@ -58,7 +58,7 @@ pub fn record_file_log(
     file: &str,
     message: &str,
 ) {
-    record_log(logs, level, file, None, None, None, message);
+//     record_log(logs, level, file, None, None, None, message);
 }
 
 /// Append a line log to the logs list
@@ -71,15 +71,15 @@ pub fn record_line_log(
     line: &str,
     message: &str,
 ) {
-    record_log(
-        logs,
-        level,
-        file,
-        Some(linum_new),
-        Some(linum_old),
-        Some(line.to_string()),
-        message,
-    );
+//     record_log(
+//         logs,
+//         level,
+//         file,
+//         Some(linum_new),
+//         Some(linum_old),
+//         Some(line.to_string()),
+//         message,
+//     );
 }
 
 /// Get the color of a log level
